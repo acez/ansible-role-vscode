@@ -1,0 +1,27 @@
+---
+- name: ensure vscode installed
+  when: ansible_distribution == "MacOSX"
+  homebrew_cask:
+    name: "visual-studio-code"
+    state: present
+
+- name: ensure vscode extensions installed
+  command:
+    cmd: "code --install-extension {{ item }} --force"
+  with_items: "{{ vscode_extensions or [] }} "
+  register: ret
+  changed_when: '"is already installed" not in ret.stdout'
+
+- name: get installed extensions
+  command: code --list-extensions
+  register: installed_extensions
+  changed_when: false
+
+- name: ensure unneeded extensions removed
+  command: "code --uninstall-extension {{ item }}"
+  with_items: "{{ installed_extensions.stdout.split('\n') }}"
+  when: not (item in (vscode_extensions or []))
+  register: ret_uninstall
+  changed_when: '"was successfully uninstalled" not in ret_uninstall.stdout'
+
+
