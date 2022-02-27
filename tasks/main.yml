@@ -23,5 +23,3 @@
   when: not (item in (vscode_extensions or []))
   register: ret_uninstall
   changed_when: '"was successfully uninstalled" not in ret_uninstall.stdout'
-
-
